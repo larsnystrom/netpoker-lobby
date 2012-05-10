@@ -35,18 +35,18 @@ public class PlayerThread extends Thread {
 					
 					command = line.substring(0, 2);
 					
-					if(command.equals("L:")){
-						//TODO
+					if(command.equals("L")){
+						System.out.println("Command: " + " L");
 					}else if(command.equals("MA")){
-						//TODO				
+						System.out.println("Command: " + " MA");				
 					}else if(command.equals("MG")){
-						//TODO
-					}else if(command.equals("help:")){
-						//TODO
-					}else if(command.equals("Join")){
-						//TODO
+						System.out.println("Command: " + " MG");
+					}else if(command.equals("help")){
+						System.out.println("Command: " + " help");
+					}else if(command.equals("join")){
+						System.out.println("Command: " + " join");
 					}else if(command.equals("Q")){
-						//TODO
+						System.out.println("Command: " + " Q");
 					}else{
 						//NO such command
 					}
