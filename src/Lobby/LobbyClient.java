@@ -25,7 +25,7 @@ public class LobbyClient {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(
 					input));
 			System.out.println("Write your player name:");
-			String line = reader.readLine();;
+			String line = reader.readLine();
 
 			while (line != null) {
 				System.out.println(line);

@@ -26,6 +26,7 @@ public class Game {
 	public void send(String message){
 		for(Player player: players){
 			try {
+				System.out.println("Skickar till playerInGame: " + player.getName());
 				OutputStream output = player.getConnection().getOutputStream();
 				output.write(message.getBytes());
 				output.flush();
@@ -68,6 +69,9 @@ public class Game {
 		return inGame;
 	}
 	
+	public Player getHost(){
+		return host;
+	}
 	public String getGamename(){
 		return name;
 	}
@@ -81,10 +85,11 @@ public class Game {
 	
 	public String listFullGame(){
 		StringBuilder sb = new StringBuilder();
-		sb.append("Game name: " + name + "\n");
+		sb.append("Game name: "  + listGame() + "\n");
+		sb.append("Host: " + host.getName() + "\n");
 		for(int i = 0; i < players.size(); i++){
 			sb.append("Player " + i + ": ");
-			sb.append(players.get(i).toString() + "\n");
+			sb.append(players.get(i).getName() + "\n");
 		}
 		return sb.toString();
 	}

@@ -17,7 +17,7 @@ public class TCPServer {
 		ServerSocket server = null;
 		try {
 			server = new ServerSocket(30000);
-			System.out.println("Started...");
+			System.out.println("Started server: " + server.getInetAddress().getHostAddress());
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

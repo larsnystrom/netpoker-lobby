@@ -14,11 +14,13 @@ public class Lobby {
 	}
 	
 	public void send(String message){
+		System.out.println("SendAll");
 		for(Game game: games){
 			game.send(message);
 		}
 		for(Player idlePlayer: idlePlayers){
 			try {
+				System.out.println("Skickar till idlePlayer: " + idlePlayer.getName());
 				OutputStream output = idlePlayer.getConnection().getOutputStream();
 				output.write(message.getBytes());
 				output.flush();
@@ -39,7 +41,11 @@ public class Lobby {
 	}
 	
 	public boolean addGame(Game game){
-		return games.add(game);
+		if(games.add(game)){
+			idlePlayers.remove(game.getHost());
+			return true;
+		}
+		return false;
 	}
 	
 	public boolean addIdlePlayer(Player player){
@@ -58,7 +64,11 @@ public class Lobby {
 	}
 	
 	public boolean removePlayerFromGame(String gameName, Player player){
-		return removePlayer(findGame(gameName), player);
+		if(removePlayer(findGame(gameName), player)){
+			idlePlayers.add(player);
+			return true;
+		}
+		return false;
 	}
 	
 	public boolean removeLostPlayer(Player player){
@@ -115,11 +125,22 @@ public class Lobby {
 		return found;
 	}
 
+	public Game findGameFromPlayer(Player player){
+		for(Game game: games){
+			if(game.playerInGame(player)){
+				return game;
+			}
+		}
+		return null;
+	}
 
 	public Game findGame(String gameName){
 		for(Game game: games){
-			if(gameName.equals(game.getGamename()));
+			if(gameName.equals(game.getGamename())){
+				System.out.println("Game att skapa: " + gameName + " game att jämföra med: " + game.getGamename());
 				return game;
+			}
+				
 		}
 		return null;
 	}

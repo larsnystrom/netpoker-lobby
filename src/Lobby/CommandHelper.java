@@ -1,16 +1,25 @@
 package Lobby;
 
 public class CommandHelper {
-	static String[] commands = {"list", "message-all", "message-game", "help", "join", "create", "leave", "quit"};
+	static String[] idleCommands = {"list", "message-all", "help", "join", "create",  "quit"};
+	static String[] gameCommands = {"gameinfo", "message-game", "leave"};
 
 	
 	public static String availableCommands(){
 		StringBuilder sb = new StringBuilder();
 		sb.append("Available commands:\n");
-		for(int i = 0; i < commands.length; i ++){
-			sb.append("'"+commands[i] + ":' - ");
-			sb.append(commandInfo(commands[i]) + "\n");
-		}		
+		sb.append("\n<Idle commands>:\n");
+		for(int i = 0; i < idleCommands.length; i ++){
+			sb.append("'"+idleCommands[i] + ":' - ");
+			sb.append(commandInfo(idleCommands[i]) + "\n");
+		}
+		sb.append("\n<Game extra commands> (you need to be in a game to use these)\n");
+		for(int i = 0; i < gameCommands.length; i++){
+			sb.append("'"+gameCommands[i] + ":' - ");
+			sb.append(commandInfo(gameCommands[i]) + "\n");
+		}
+		sb.append("---------------------------------------- ");
+		
 		return sb.toString();
 	}
 	
@@ -18,39 +27,29 @@ public class CommandHelper {
 		if(command == null){
 			return "No such command";
 		}
-		int i;
-		for(i = 0; i < commands.length; i++){
-			if(command.equals(commands[i])){
-				break;
-			}
+		String toSend = "";
+		if(command.equals(idleCommands[0])){
+			toSend = "List all available games";
+		}else if(command.equals(idleCommands[1])){
+			toSend = "Message all players on the server";
+		}else if(command.equals(idleCommands[2])){
+			toSend = "List all commands";
+		}else if(command.equals(idleCommands[3])){
+			toSend = "join <gamename>";
+		}else if(command.equals(idleCommands[4])){
+			toSend = "Create <gamename>";
+		}else if(command.equals(idleCommands[5])){
+			toSend = "Quit the program";
+		}else if(command.equals(gameCommands[0])){
+			toSend = "Some info about the game";
+		}else if(command.equals(gameCommands[1])){
+			toSend = "Message all players in the game";
+		}else if(command.equals(gameCommands[2])){
+			toSend = "Leave <gamename>";
+		}else{
+			toSend = "No such command";
 		}
-		String s = "";
-		switch(i){
-		case(0):
-			s = "List all available games";
-			break;
-		case(1):
-			s = "Message all players in the lobby";
-			break;
-		case(2):
-			s = "Message all players in a game";
-			break;
-		case(3):
-			s = "List all commands";
-			break;
-		case(4):
-			s = "join <gamename>";
-			break;
-		case(5):
-			s = "Create <gamename>";
-		case(6):
-			s = "Leave <gamename>";
-		case(7):
-			s = "Quit the program";
-		default:
-			s = "No such command";	
-		}
-		
-		return s;
+
+		return toSend;
 	}
 }
