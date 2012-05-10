@@ -33,7 +33,7 @@ public class Lobby {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Games: \n");
 		for(Game game: games){
-			sb.append(game.toString() + "\n");
+			sb.append(game.getGamename() + "\n");
 		}
 		return sb.toString();
 	}
@@ -43,6 +43,7 @@ public class Lobby {
 	}
 	
 	public boolean addIdlePlayer(Player player){
+		System.out.println("Adding idle player: " + player.getName());
 		return idlePlayers.add(player);
 	}
 	
@@ -64,11 +65,27 @@ public class Lobby {
 		// Check which game a player is in and removes he/she from it.
 		for(Game game: games){
 			if(game.playerInGame(player)){
+				System.out.println("Removing idle player: " + player.getName());
+				if(game.host.equals(player)){
+					return closeGame(game, player);
+				}
 				return removePlayer(game, player);
 			}
 		}
 		// If the player isn«t in any game he/she is removed from the idlePlayers-list instead.
+		System.out.println("Removing idle player: " + player.getName());
 		return idlePlayers.remove(player);
+		
+	}
+	
+	private boolean closeGame(Game game, Player player){
+		removePlayer(game, player);
+		game.send("Host gone, closing game \n");
+		for(int i = 0; i < game.players.size(); i++){
+			idlePlayers.add(game.players.remove(i));
+		}
+		games.remove(game);
+		return true;
 		
 	}
 	
@@ -78,9 +95,28 @@ public class Lobby {
 		}
 		return false;
 	}
+	
+	public boolean findPlayer(String playerName){
+		boolean found = false;
+		for(Player player: idlePlayers){
+			if(player.getName().equals(playerName)){
+				found = true;
+				break;
+			}
+		}
+		if(!found){
+			for(Game game: games){
+				if(game.nameInGame(playerName)){
+					found = true;
+					break;
+				}
+			}
+		}
+		return found;
+	}
 
 
-	private Game findGame(String gameName){
+	public Game findGame(String gameName){
 		for(Game game: games){
 			if(gameName.equals(game.getGamename()));
 				return game;

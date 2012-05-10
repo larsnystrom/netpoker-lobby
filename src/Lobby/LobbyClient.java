@@ -24,6 +24,7 @@ public class LobbyClient {
 			InputStream input = connection.getInputStream();
 			BufferedReader reader = new BufferedReader(new InputStreamReader(
 					input));
+			System.out.println("Write your player name:");
 			String line = reader.readLine();;
 
 			while (line != null) {

@@ -15,12 +15,16 @@ public class Player {
 		return name;
 	}
 	
+	public void setName(String name){
+		this.name = name;
+	}
+	
 	public Socket getConnection(){
 		return connection;
 	}
 	
 	public boolean equals(Player player){
-		return player.getConnection().getInetAddress().equals(connection.getInetAddress()) && player.getConnection().getPort() == connection.getPort();
+		return (player.getConnection().getInetAddress().equals(connection.getInetAddress()) && player.getConnection().getPort() == connection.getPort());
 	}
 	
 }

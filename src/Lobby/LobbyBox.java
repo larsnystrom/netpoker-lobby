@@ -1,9 +1,9 @@
 package Lobby;
 
-public class MailBox {
+public class LobbyBox {
 	String s = null;
 	
-	public MailBox(){
+	public LobbyBox(){
 		
 	}
 	

@@ -57,6 +57,17 @@ public class Game {
 		return inGame;
 	}
 	
+	public boolean nameInGame(String playerName){
+		boolean inGame = false;
+		for(Player p : players){
+			if(p.getName().equals(playerName)){
+				inGame = true;
+				break;
+			}
+		}
+		return inGame;
+	}
+	
 	public String getGamename(){
 		return name;
 	}
@@ -76,7 +87,10 @@ public class Game {
 			sb.append(players.get(i).toString() + "\n");
 		}
 		return sb.toString();
-
+	}
+	
+	public boolean equals(Game game){
+		return game.name.equals(name);
 	}
 
 }

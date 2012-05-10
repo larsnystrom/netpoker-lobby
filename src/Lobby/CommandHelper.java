@@ -1,17 +1,14 @@
 package Lobby;
 
 public class CommandHelper {
-	static String[] commands = {"L:", "MA:", "MG:", "help", "Join", "Q"};
+	static String[] commands = {"list", "message-all", "message-game", "help", "join", "create", "leave", "quit"};
 
-	public CommandHelper(){
-		
-	}
 	
 	public static String availableCommands(){
 		StringBuilder sb = new StringBuilder();
 		sb.append("Available commands:\n");
 		for(int i = 0; i < commands.length; i ++){
-			sb.append(commands[i] + ": ");
+			sb.append("'"+commands[i] + ":' - ");
 			sb.append(commandInfo(commands[i]) + "\n");
 		}		
 		return sb.toString();
@@ -42,10 +39,14 @@ public class CommandHelper {
 			s = "List all commands";
 			break;
 		case(4):
-			s = "Join <gamename>";
+			s = "join <gamename>";
 			break;
 		case(5):
-			s = "Quit";
+			s = "Create <gamename>";
+		case(6):
+			s = "Leave <gamename>";
+		case(7):
+			s = "Quit the program";
 		default:
 			s = "No such command";	
 		}

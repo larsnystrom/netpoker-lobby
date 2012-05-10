@@ -4,9 +4,9 @@ import java.io.OutputStream;
 
 
 public class ReaderThread extends Thread{
-	private MailBox mailBox;
+	private LobbyBox mailBox;
 	private Lobby lobby;
-	public ReaderThread(MailBox mailBox, Lobby lobby ){
+	public ReaderThread(LobbyBox mailBox, Lobby lobby ){
 		this.mailBox = mailBox;
 		this.lobby = lobby;
 	}

@@ -11,7 +11,7 @@ public class TCPServer {
 	
 	public static void main(String[]args){
 		Lobby lobby = new Lobby();
-		MailBox mailBox = new MailBox();
+		LobbyBox mailBox = new LobbyBox();
 		ReaderThread mailBoxReader = new ReaderThread(mailBox, lobby);
 		mailBoxReader.start();
 		ServerSocket server = null;
