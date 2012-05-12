@@ -1,4 +1,5 @@
-package Lobby;
+ package Lobby;
+import java.awt.EventQueue;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,32 +17,51 @@ public class LobbyClient {
 			System.exit(1);
 		}
 
-		try {
-			Socket connection = new Socket(InetAddress.getByName(args[0]),
-					Integer.parseInt(args[1]));
-			WriterThread writer = new WriterThread(connection);
-			writer.start();
-			InputStream input = connection.getInputStream();
-			BufferedReader reader = new BufferedReader(new InputStreamReader(
-					input));
-			System.out.println("Write your player name:");
-			String line = reader.readLine();
+			final Socket connection;
+			try {
+				connection = new Socket(InetAddress.getByName(args[0]),
+						Integer.parseInt(args[1]));
+				EventQueue.invokeLater(new Runnable() {
+					public void run() {
+						
+							LobbyClientGUI window = new LobbyClientGUI("baseState", connection);
+							window.frame.setVisible(true);
+							InputStream input;
+							
+							try {
+								input = connection.getInputStream();
+								BufferedReader reader = new BufferedReader(new InputStreamReader(
+										input));
+								System.out.println("Write your player name:");
+								String line = reader.readLine();
 
-			while (line != null) {
-				System.out.println(line);
-				line = reader.readLine();
+								while (line != null) {
+									System.out.println(line);
+									line = reader.readLine();
+								}
+								System.exit(1);
+								
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							
+					}
+				});
+
+				
+			} catch (NumberFormatException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (UnknownHostException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			System.exit(1);
-
-		} catch (NumberFormatException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+			
+			
+			
 	}
 }

@@ -1,8 +1,26 @@
 package Lobby;
 
-public class CommandHelper {
+public class ServerCommands {
 	static String[] idleCommands = {"list", "message-all", "help", "join", "create",  "quit"};
 	static String[] gameCommands = {"gameinfo", "message-game", "leave"};
+	
+	//Spliiter
+	public static final String SPLITTER = "_@@_";
+	
+	//Idle Commands
+	public static final String LIST = "LIST";
+	public static final String MESSAGEALL = "MESSAGEALL";
+	public static final String HELP = "HELP";
+	public static final String JOIN = "JOIN";
+	public static final String CREATE = "CREATE";
+	public static final String QUIT = "QUIT";
+	
+	//Extra commands
+	public static final String GAMEINFO = "GAMEINFO";
+	public static final String MESSAGEGAME = "MESSAGEGAME";
+	public static final String LEAVE = "LEAVE";
+	public static final String START = "START";
+	
 
 	
 	public static String availableCommands(){

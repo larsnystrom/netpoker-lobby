@@ -34,139 +34,145 @@ public class PlayerThread extends Thread {
 				if(!lobby.findPlayer(name)){
 					player.setName(name);
 					lobby.addIdlePlayer(player);
-					mailBox.write(player.getName() + " joined the server\n");
+					mailBox.write(ClientCommands.CHAT + ClientCommands.SPLITTER + ClientCommands.ALL + ClientCommands.SPLITTER + player.getName() + " joined the lobby\n");
 					added = true;
 					break;
 				}else{
-					output.write(("Name already taken, choose another one \n").getBytes());
+					output.write((ClientCommands.INITIALIZE + ClientCommands.SPLITTER + ClientCommands.NAMETAKEN + "\n").getBytes());
 					output.flush();
 				}
 				
 			}
 			
 			
-			output.write((CommandHelper.availableCommands() + "\n").getBytes());
-			System.out.println("Skickat commands");
+			output.write((ClientCommands.CHAT + ClientCommands.SPLITTER + ClientCommands.SYSTEM + ClientCommands.SPLITTER + "You joined the server\n").getBytes());
+			System.out.println("Initiated player");
 			output.flush();
-			String command = " ";
+			String[] commandSequence = new String[1];
 			do{
 				String line = reader.readLine();
 				if(line != null){
-					String[] splittedLine = line.split(":");
-					command = splittedLine[0];
+					commandSequence = line.split(ServerCommands.SPLITTER);
 					String commandExtra = null;
-					if(splittedLine.length > 1){
-						commandExtra = splittedLine[1];
+					if(commandSequence.length > 1){
+						commandExtra = commandSequence[1];
 						commandExtra = commandExtra.trim();
 					}
 					
 					String toSend = null;
-					if(command.equals(CommandHelper.idleCommands[0])){
-						System.out.println("command: " + CommandHelper.idleCommands[0]);
-						toSend = lobby.listGames() +"\n";
+					if(commandSequence[0].equals(ServerCommands.LIST)){
+						System.out.println("command: " + ServerCommands.LIST);
+						toSend = ClientCommands.INITIALIZE + ClientCommands.SPLITTER + ClientCommands.LIST + ClientCommands.SPLITTER + lobby.listGames() +"\n";
 						output.write(toSend.getBytes());
-					}else if(command.equals(CommandHelper.idleCommands[1])){
-						System.out.println("command: " + CommandHelper.idleCommands[1]);
+					}else if(commandSequence[0].equals(ServerCommands.MESSAGEALL)){
+						System.out.println("command: " + ServerCommands.MESSAGEALL);
+						toSend = ClientCommands.CHAT + ClientCommands.SPLITTER;
 						if(commandExtra != null){
-							lobby.send("(Lobby) " + player.getName() + ": " + commandExtra + "\n");
+							toSend = toSend + ClientCommands.ALL + ClientCommands.SPLITTER + player.getName() + ": " + commandExtra + "\n";
+							lobby.send(toSend);
 						}else{
-							toSend = "No message typed \n";
+							toSend = toSend + ClientCommands.SYSTEM + ClientCommands.SPLITTER + "No message typed \n";
 							output.write(toSend.getBytes());
 						}
 						
-					}else if(command.equals(CommandHelper.idleCommands[2])){
-						System.out.println("command: " + CommandHelper.idleCommands[3]);
-						toSend = CommandHelper.availableCommands() + "\n";
-						output.write(toSend.getBytes());
-					}else if(command.equals(CommandHelper.idleCommands[3])){
-						System.out.println("command: " + CommandHelper.idleCommands[4]);
+					}else if(commandSequence[0].equals(ServerCommands.HELP)){
+						//TODO
+						
+//						System.out.println("command: " + ServerCommands.idleCommands[3]);
+//						toSend = ServerCommands.availableCommands() + "\n";
+//						output.write(toSend.getBytes());
+					}else if(commandSequence[0].equals(ServerCommands.JOIN)){
+						System.out.println("command: " + ServerCommands.JOIN);
 						if(!player.isInGame()){
 							if(lobby.addPlayerToGame(commandExtra, player)){
 								player.setInGame(true);
-								toSend = "Joined game " + commandExtra + " \n";
+								toSend = ClientCommands.GAME + ClientCommands.SPLITTER + ClientCommands.JOIN + ClientCommands.SPLITTER + commandExtra + "\n";
 							}else{
-								toSend = "Couldn«t find game or game is already full \n";
+								toSend = ClientCommands.CHAT + ClientCommands.SPLITTER + ClientCommands.SYSTEM + ClientCommands.SPLITTER + "Couldn«t find game or game is already full \n";
 							}
 						}else{
-							toSend = "You need to leave the game you are in before joining another one\n";
+							toSend = ClientCommands.CHAT + ClientCommands.SPLITTER + ClientCommands.SYSTEM + ClientCommands.SPLITTER + "You need to leave the game you are in before joining another one\n";
 						}
 						output.write(toSend.getBytes());
 						if(player.isInGame()){
 							Game game = lobby.findGameFromPlayer(player);
-							game.send(player.getName() + " joined the game\n");
+							game.send(ClientCommands.GAME + ClientCommands.SPLITTER + ClientCommands.OTHERJOIN + ClientCommands.SPLITTER + game.getGamename() + ClientCommands.SPLITTER + player.getName() + " joined the game\n");
 						}
 						
-					}else if(command.equals(CommandHelper.idleCommands[4])){
-						System.out.println("command: " + CommandHelper.idleCommands[5]);
+					}else if(commandSequence[0].equals(ServerCommands.CREATE)){
+						System.out.println("command: " + ServerCommands.CREATE);
 						if(!player.isInGame()){
 							if(lobby.findGame(commandExtra) == null && lobby.addGame(new Game(commandExtra, player, 8))){
 								player.setInGame(true);
-								toSend = "Game: " + commandExtra + " created \n";
+								toSend = ClientCommands.GAME + ClientCommands.SPLITTER + ClientCommands.HOST + ClientCommands.SPLITTER + commandExtra + "\n"; 
 							}else{
-								toSend = "Gamename already taken \n";
+								toSend = ClientCommands.CHAT + ClientCommands.SPLITTER + ClientCommands.SYSTEM + ClientCommands.SPLITTER + "Gamename already taken \n";
 							}
 						}else{
-							toSend = "You need to leave the game you are in before creating another one\n";
+							toSend = ClientCommands.CHAT + ClientCommands.SPLITTER + ClientCommands.SYSTEM + ClientCommands.SPLITTER + "You need to leave the game you are in before creating another one\n";
+						}
+						output.write(toSend.getBytes());					 
+					}else if(commandSequence[0].equals(ServerCommands.GAMEINFO)){
+						System.out.println("command: " + ServerCommands.GAMEINFO);
+						if(player.isInGame()){
+							Game game = lobby.findGame(commandExtra);
+							if(game != null){
+								toSend = ClientCommands.GAME + ClientCommands.SPLITTER + ClientCommands.INFO + ClientCommands.SPLITTER + game.listFullGame() + "\n";
+							}else{
+								toSend = ClientCommands.CHAT + ClientCommands.SPLITTER + ClientCommands.SYSTEM + ClientCommands.SPLITTER + "couldn«t find game \n";
+							}
+						}else{
+							toSend = ClientCommands.CHAT + ClientCommands.SPLITTER + ClientCommands.SYSTEM + ClientCommands.SPLITTER + "You need to be in a game to use this command \n";
 						}
 						output.write(toSend.getBytes());
-						
-					}else if(command.equals(CommandHelper.gameCommands[0])){
-						System.out.println("command: " + CommandHelper.gameCommands[0]);
-						if(player.isInGame()){
-							Game game = lobby.findGameFromPlayer(player);
-							if(game != null){
-								toSend = game.listFullGame();
-							}else{
-								toSend = "couldn«t find game \n";
-							}
-							output.write(toSend.getBytes());
-						}else{
-							toSend = "You need to be in a game to use this command \n";
-						}
-					}else if(command.equals(CommandHelper.gameCommands[1])){
-						System.out.println("command: " + CommandHelper.gameCommands[1]);
+					}else if(commandSequence[0].equals(ServerCommands.MESSAGEGAME)){
+						System.out.println("command: " + ServerCommands.MESSAGEGAME);
 						if(player.isInGame()){
 							if(commandExtra != null && commandExtra.charAt(0) != ' '){
 								Game game = lobby.findGameFromPlayer(player);
 								if(game != null){
-									game.send("(" + game.getGamename() + ") " + player.getName() + ": " + commandExtra + "\n");
+									toSend = ClientCommands.CHAT + ClientCommands.SPLITTER + ClientCommands.GAMECHAT + ClientCommands.SPLITTER + player.getName() + ": " + commandExtra + "\n";
+									game.send(toSend);
 								}else{
-									toSend = "couldn«t find game \n";
+									toSend = ClientCommands.CHAT + ClientCommands.SPLITTER + ClientCommands.SYSTEM + ClientCommands.SPLITTER + "couldn«t find game \n";
 									output.write(toSend.getBytes());
 								}
 							}else{
-								toSend = "No message typed \n";
+								toSend = ClientCommands.CHAT + ClientCommands.SPLITTER + ClientCommands.SYSTEM + ClientCommands.SPLITTER + "No message typed \n";
 								output.write(toSend.getBytes());
 							}
 						}else{
-							toSend = "You need to be in a game to use this command \n";
+							toSend = ClientCommands.CHAT + ClientCommands.SPLITTER + ClientCommands.SYSTEM + ClientCommands.SPLITTER + "You need to be in a game to use this command \n";
 							output.write(toSend.getBytes());
 						}
 						
 						
-					}else if(command.equals(CommandHelper.gameCommands[2])){
-						System.out.println("command: " + CommandHelper.gameCommands[2]);
+					}else if(commandSequence[0].equals(ServerCommands.LEAVE)){
+						System.out.println("command: " + ServerCommands.LEAVE);
 						if(player.isInGame()){
 							if(lobby.removePlayerFromGame(commandExtra, player)){
 								player.setInGame(false);
-								toSend = "Left game " + commandExtra + " \n";
+								toSend = ClientCommands.GAME + ClientCommands.SPLITTER + ClientCommands.LEAVE + ClientCommands.SPLITTER + commandExtra + "\n";
 							}else{
-								toSend = "Wrong gamename \n";
+								toSend = ClientCommands.CHAT + ClientCommands.SPLITTER + ClientCommands.SYSTEM + ClientCommands.SPLITTER + "Wrong gamename \n";
 							}
 						}else{
-							toSend = "You need to be in a game to use this command \n";
+							toSend = ClientCommands.CHAT + ClientCommands.SPLITTER + ClientCommands.SYSTEM + ClientCommands.SPLITTER + "You need to be in a game to use this command \n";
 						}						
 						output.write(toSend.getBytes());
+					}else if(commandSequence[0].equals(ServerCommands.START)){
+						//TODO
 					}else{
-						toSend = "No such command \n";
+						toSend = ClientCommands.CHAT + ClientCommands.SPLITTER + ClientCommands.SYSTEM + ClientCommands.SPLITTER + "No such command \n";
 						output.write(toSend.getBytes());
 					}
 					output.flush();
+					
 				}else{
 					break;
 				}				
 				
-			}while(!command.equals("quit") && player.getConnection().isConnected());
+			}while(!commandSequence[0].equals(ServerCommands.QUIT) && player.getConnection().isConnected());
 			connection.close();
 			if(lobby.removeLostPlayer(player)){
 				player.setInGame(false);

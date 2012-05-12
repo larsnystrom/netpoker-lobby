@@ -43,6 +43,7 @@ public class Lobby {
 	public boolean addGame(Game game){
 		if(games.add(game)){
 			idlePlayers.remove(game.getHost());
+			send(ClientCommands.GAME + ClientCommands.SPLITTER + ClientCommands.ADD + ClientCommands.SPLITTER + game.getGamename() + "\n");
 			return true;
 		}
 		return false;
@@ -90,11 +91,14 @@ public class Lobby {
 	
 	private boolean closeGame(Game game, Player player){
 		removePlayer(game, player);
-		game.send("Host gone, closing game \n");
+		game.send(ClientCommands.CHAT + ClientCommands.SPLITTER + ClientCommands.GAMECHAT + ClientCommands.SPLITTER +  "Host gone, closing game \n");
 		for(int i = 0; i < game.players.size(); i++){
-			idlePlayers.add(game.players.remove(i));
+			Player p = game.players.remove(i);
+			p.setInGame(false);
+			idlePlayers.add(p);
 		}
 		games.remove(game);
+		send(ClientCommands.GAME + ClientCommands.SPLITTER + ClientCommands.REMOVAL + ClientCommands.SPLITTER + game.getGamename() + "\n");
 		return true;
 		
 	}
