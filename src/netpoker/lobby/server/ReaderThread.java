@@ -1,6 +1,5 @@
-package Lobby;
-import java.io.IOException;
-import java.io.OutputStream;
+package netpoker.lobby.server;
+
 
 
 public class ReaderThread extends Thread{

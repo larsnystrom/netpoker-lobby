@@ -1,4 +1,4 @@
-package Lobby;
+package netpoker.lobby.server;
 
 import java.net.Socket;
 

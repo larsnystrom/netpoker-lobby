@@ -1,4 +1,4 @@
-package Lobby;
+package netpoker.lobby.server;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -6,6 +6,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+
+import netpoker.lobby.ClientCommands;
+import netpoker.lobby.ServerCommands;
 
 public class PlayerThread extends Thread {
 	Socket connection;
@@ -118,7 +121,7 @@ public class PlayerThread extends Thread {
 										+ ClientCommands.SPLITTER
 										+ ClientCommands.SYSTEM
 										+ ClientCommands.SPLITTER
-										+ "Couldn«t find game or game is already full \n";
+										+ "Couldnï¿½t find game or game is already full \n";
 							}
 						} else {
 							toSend = ClientCommands.CHAT
@@ -188,7 +191,7 @@ public class PlayerThread extends Thread {
 									+ ClientCommands.SPLITTER
 									+ ClientCommands.SYSTEM
 									+ ClientCommands.SPLITTER
-									+ "couldn«t find game \n";
+									+ "couldnï¿½t find game \n";
 						}
 						System.out.println(toSend);
 						output.write(toSend.getBytes());
@@ -212,7 +215,7 @@ public class PlayerThread extends Thread {
 											+ ClientCommands.SPLITTER
 											+ ClientCommands.SYSTEM
 											+ ClientCommands.SPLITTER
-											+ "couldn«t find game \n";
+											+ "couldnï¿½t find game \n";
 									System.out.println(toSend);
 									output.write(toSend.getBytes());
 								}
@@ -262,7 +265,9 @@ public class PlayerThread extends Thread {
 						System.out.println(toSend);
 						output.write(toSend.getBytes());
 					} else if (commandSequence[0].equals(ServerCommands.START)) {
-						// TODO
+						
+						
+						
 					} else {
 						toSend = ClientCommands.CHAT + ClientCommands.SPLITTER
 								+ ClientCommands.SYSTEM

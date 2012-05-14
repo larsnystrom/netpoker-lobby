@@ -1,8 +1,10 @@
-package Lobby;
+package netpoker.lobby.server;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+
+import netpoker.lobby.ClientCommands;
 
 public class Lobby {
 	ArrayList<Game> games;
@@ -68,11 +70,11 @@ public class Lobby {
 		boolean state = false;
 		if(game != null){
 			if(game.getHost().equals(player)){
-				System.out.println("StŠnger ner spel");
+				System.out.println("Stï¿½nger ner spel");
 				closeGame(game, player);
 				state = true;
 			}else{
-				System.out.println("Tar bort spelare frŒn spel");
+				System.out.println("Tar bort spelare frï¿½n spel");
 				
 				state = removePlayer(game, player);
 				if(state){
@@ -95,7 +97,7 @@ public class Lobby {
 				return removePlayer(game, player);
 			}
 		}
-		// If the player isn«t in any game he/she is removed from the idlePlayers-list instead.
+		// If the player isnï¿½t in any game he/she is removed from the idlePlayers-list instead.
 		System.out.println("Removing idle player: " + player.getName());
 		return idlePlayers.remove(player);
 		
@@ -174,7 +176,7 @@ public class Lobby {
 	public Game findGame(String gameName){
 		for(Game game: games){
 			if(gameName.equals(game.getGamename())){
-				System.out.println("Game att skapa: " + gameName + " game att jŠmfšra med: " + game.getGamename());
+				System.out.println("Game att skapa: " + gameName + " game att jï¿½mfï¿½ra med: " + game.getGamename());
 				return game;
 			}
 				

@@ -1,8 +1,10 @@
-package Lobby;
+package netpoker.lobby.server;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+
+import netpoker.lobby.ClientCommands;
 
 public class Game {
 	protected String name;

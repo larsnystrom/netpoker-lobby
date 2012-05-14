@@ -1,4 +1,4 @@
-package Lobby;
+package netpoker.lobby.server;
 
 public class LobbyBox {
 	String s = null;

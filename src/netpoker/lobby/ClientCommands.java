@@ -1,4 +1,4 @@
-package Lobby;
+package netpoker.lobby;
 
 public class ClientCommands {
 	//Splitter

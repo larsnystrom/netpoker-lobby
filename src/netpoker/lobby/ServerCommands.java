@@ -1,4 +1,4 @@
-package Lobby;
+package netpoker.lobby;
 
 public class ServerCommands {
 	static String[] idleCommands = {"list", "message-all", "help", "join", "create",  "quit"};
