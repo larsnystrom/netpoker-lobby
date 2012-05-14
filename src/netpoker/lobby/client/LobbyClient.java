@@ -8,45 +8,69 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import javax.swing.JDialog;
 
 public class LobbyClient {
+	private static boolean connected = false;
+	private static Socket connection;
 
 	public static void main(String[] args) {
-		if (args.length != 2) {
-			System.out.println("Usage: java LobbyClient <hostname> <port>");
-			System.exit(1);
-		}
 
-		final Socket connection;
-		try {
-			connection = new Socket(InetAddress.getByName(args[0]),
-					Integer.parseInt(args[1]));
-
-			LobbyClientGUI window = new LobbyClientGUI(connection);
-			window.setPlayerName();
-			
-			InputStream input;
-
-			try {
-				input = connection.getInputStream();
-				BufferedReader reader = new BufferedReader(
-						new InputStreamReader(input));
-				String line = reader.readLine();
-
-				while (line != null) {
-					System.out.println(line);
-					window.updateGUI(line);
-					line = reader.readLine();
+		while(connected == false){
+			String[] dialogValues = new String[2];
+			MultipleTextFieldDialog dialog = new MultipleTextFieldDialog(dialogValues);
+			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+			dialog.setVisible(true);
+			dialogValues = dialog.getValues();
+			if(dialogValues[0] != null && dialogValues[1] != null){
+				try {
+					connection = new Socket(InetAddress.getByName(dialogValues[0]),
+							Integer.parseInt(dialogValues[1]));
+					connected = true;
+				} catch (NumberFormatException e) {
+					e.printStackTrace();
+				} catch (UnknownHostException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-				System.exit(1);
-
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
 
-		} catch (NumberFormatException e) {
+		}
+		
+		LobbyClientGUI window = new LobbyClientGUI(connection);
+		window.setPlayerName();
+
+		InputStream input;
+
+		try {
+			input = connection.getInputStream();
+			BufferedReader reader = new BufferedReader(new InputStreamReader(
+					input));
+			String line = reader.readLine();
+
+			while (line != null) {
+				System.out.println(line);
+				window.updateGUI(line);
+				line = reader.readLine();
+			}
+			System.exit(1);
+
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	public void connect(String playerName, String hostAddress, String port) {
+		try {
+			connection = new Socket(InetAddress.getByName(hostAddress),
+					Integer.parseInt(port));
+			connected = true;
+		} catch (NumberFormatException e) {
 			e.printStackTrace();
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
@@ -55,6 +79,5 @@ public class LobbyClient {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 	}
 }
