@@ -20,7 +20,7 @@ public class ServerCommands {
 	public static final String MESSAGEGAME = "MESSAGEGAME";
 	public static final String LEAVE = "LEAVE";
 	public static final String START = "START";
-	
+	public static final String SENDGAMEHOST = "SENDGAMEHOST";
 
 	
 	public static String availableCommands(){

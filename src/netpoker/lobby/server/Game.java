@@ -2,6 +2,7 @@ package netpoker.lobby.server;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.Socket;
 import java.util.ArrayList;
 
 import netpoker.lobby.ClientCommands;
@@ -25,6 +26,10 @@ public class Game {
 		
 	}
 	
+	public ArrayList<Player> getPlayers() {
+		return players;
+	}
+	
 	public void send(String message){
 		for(Player player: players){
 			try {
@@ -36,6 +41,16 @@ public class Game {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+		}
+	}
+	public void sendHost(String message){
+		Socket hostConnection = host.getConnection();
+		try {
+			OutputStream output = hostConnection.getOutputStream();
+			output.write(message.getBytes());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	

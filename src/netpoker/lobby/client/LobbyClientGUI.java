@@ -35,12 +35,17 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 import javax.swing.UIManager;
 
+import netpoker.client.NetpokerClient;
 import netpoker.lobby.ClientCommands;
 import netpoker.lobby.ServerCommands;
+import netpoker.server.ClientInfo;
+import netpoker.server.NetpokerServer;
 
 import java.awt.Font;
 
@@ -61,10 +66,16 @@ public class LobbyClientGUI {
 	private boolean isHost;
 	private int playersInHostedGame;
 	private String gameUserIsIn;
+	private String playerName;
 	private DefaultListModel listModel;
 
 	private Socket connection;
 	private OutputStream output;
+	
+
+	private ClientInfo[] clients;
+	private int playersSetup = 0;
+	private NetpokerServer pokerServer;
 
 	/**
 	 * Create the application.
@@ -92,6 +103,7 @@ public class LobbyClientGUI {
 		isHost = false;
 		playersInHostedGame = 0;
 		gameUserIsIn = "";
+		playerName = "";
 
 		frame = new JFrame();
 		frame.setBounds(100, 100, 500, 450);
@@ -248,14 +260,22 @@ public class LobbyClientGUI {
 			public void mouseClicked(MouseEvent arg0) {
 				System.out.println("start game clicked");
 
-				
-				
-				
-				
-				String action = ServerCommands.START + ServerCommands.SPLITTER
-						+ gameUserIsIn + "\n";
-				invokeAction(action);
+				pokerServer = new NetpokerServer();
+				int port = pokerServer.getPort();
 
+				clients = new ClientInfo[4];
+				for (int i = 4; i > playersInHostedGame; i--) {
+					clients[i] = new ClientInfo("Bot " + i, connection
+							.getLocalAddress(), connection.getLocalPort());
+				}
+
+				String action = ServerCommands.START + ServerCommands.SPLITTER
+						+ gameUserIsIn + ServerCommands.SPLITTER + port + "\n";
+				
+				System.out.println(action);
+				
+				invokeAction(action);
+				System.out.println("UDP Server has sent it's port");
 			}
 		});
 
@@ -386,8 +406,30 @@ public class LobbyClientGUI {
 			hostGame(actionSequence[2]);
 		} else if (actionSequence[1].equals(ClientCommands.LEAVE)) {
 			leaveGame(actionSequence[2]);
-		} else if (actionSequence[1].equals(ClientCommands.HOSTGONE)) {
-			hostGone(actionSequence[2]);
+		} else if (actionSequence[1].equals(ClientCommands.JOIN)) {
+			joinGame(actionSequence[2]);
+		} else if (actionSequence[1].equals(ClientCommands.PLAYERINFO)) {
+			System.out.println("Receiving username, address and port for client");
+			String playerName = actionSequence[2];
+			InetAddress clientAddress = null;
+			try {
+				clientAddress = InetAddress.getByName(actionSequence[3]);
+			} catch (UnknownHostException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			int clientPort = Integer.parseInt(actionSequence[4]);
+
+			clients[playersSetup] = new ClientInfo(playerName, clientAddress,
+					clientPort);
+			playersSetup++;
+			
+			if (playersSetup == playersInHostedGame) {
+				pokerServer.startGame(clients);
+			}
+			
+			System.out.println("We have " + playersSetup + " nbr of players setup");
+			
 		} else if (actionSequence[1].equals(ClientCommands.INFO)) {
 			setGameInfo(actionSequence[2]);
 		} else if (actionSequence[1].equals(ClientCommands.OTHERJOIN)) {
@@ -414,11 +456,43 @@ public class LobbyClientGUI {
 			}
 			chatTextArea.append(actionSequence[2] + ": " + actionSequence[3]);
 		} else if (actionSequence[1].equals(ClientCommands.START)) {
-			if (isHost && playersInHostedGame == 4) {
-				System.out.println("Startbutton clicked");
-				// Add Command Chain for starting a game
-				// invokeAction(action);
+			System.out.println("start game received, starting client...");
+			InetAddress serverAddress = null;
+			try {
+				serverAddress = InetAddress.getByName(actionSequence[2]);
+			} catch (UnknownHostException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
+			int serverPort = Integer.parseInt(actionSequence[3]);
+
+			String[] playerNames = new String[4];
+			int i;
+			for (i = 4; i < actionSequence.length; i++) {
+				playerNames[i - 4] = actionSequence[i];
+			}
+
+			if (i < 8) {
+				System.out.println("Not enough players...");
+			}
+
+			NetpokerClient pokerClient = new NetpokerClient(playerName, playerNames,
+					serverAddress, serverPort);
+
+			int clientPort = pokerClient.getPortAddress();
+
+			String action = ServerCommands.SENDGAMEHOST
+					+ ServerCommands.SPLITTER + Integer.toString(clientPort)
+					+ "\n";
+			invokeAction(action);
+			
+			System.out.println("Client started, sending port to UDP server");
+
+			// if (isHost && playersInHostedGame == 4) {
+			// System.out.println("Startbutton clicked");
+			// // Add Command Chain for starting a game
+			// // invokeAction(action);
+			// }
 
 		}
 	}
@@ -459,6 +533,8 @@ public class LobbyClientGUI {
 				}
 			}
 
+		} else if (actionSequence[1].equals(ClientCommands.NAMECONFIRMED)) {
+			playerName = actionSequence[2];
 		}
 	}
 

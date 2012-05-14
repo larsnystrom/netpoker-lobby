@@ -24,10 +24,12 @@ public class ClientCommands {
 	public static final String OTHERLEAVE = "OTHERLEAVE";
 	public static final String HOSTGONE = "HOSTGONE";
 	public static final String START = "START";
+	public static final String PLAYERINFO = "PLAYERINFO";
 	
 	//Initialize commands
 	public static final String INITIALIZE ="INITIALIZE";
 	public static final String NAMETAKEN ="NAMETAKEN";
 	public static final String LIST = "LIST";
+	public static final String NAMECONFIRMED = "NAMECONFIRMED";
 	
 }

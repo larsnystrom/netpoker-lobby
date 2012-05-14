@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.Socket;
+import java.util.ArrayList;
 
 import netpoker.lobby.ClientCommands;
 import netpoker.lobby.ServerCommands;
@@ -38,6 +40,10 @@ public class PlayerThread extends Thread {
 				if (!lobby.findPlayer(name)) {
 					player.setName(name);
 					lobby.addIdlePlayer(player);
+					output.write((ClientCommands.INITIALIZE
+							+ ClientCommands.SPLITTER
+							+ ClientCommands.NAMECONFIRMED
+							+ ClientCommands.SPLITTER + name + "\n").getBytes());
 					mailBox.write(ClientCommands.CHAT + ClientCommands.SPLITTER
 							+ ClientCommands.ALL + ClientCommands.SPLITTER
 							+ player.getName() + " joined the lobby\n");
@@ -265,6 +271,50 @@ public class PlayerThread extends Thread {
 						System.out.println(toSend);
 						output.write(toSend.getBytes());
 					} else if (commandSequence[0].equals(ServerCommands.START)) {
+						System.out.println("TCP server har fått starttecken");
+						String gameName = commandSequence[1];
+						int serverPort = Integer.parseInt(commandSequence[2]);
+						InetAddress serverAddress = connection.getInetAddress();
+
+						Game game = lobby.findGame(gameName);
+						ArrayList<Player> players = game.getPlayers();
+
+						StringBuilder sb = new StringBuilder();
+						sb.append(ClientCommands.GAME);
+						sb.append(ClientCommands.SPLITTER);
+						sb.append(ClientCommands.START);
+						sb.append(ClientCommands.SPLITTER);
+						sb.append(serverAddress.getHostAddress());
+						sb.append(ClientCommands.SPLITTER);
+						sb.append(serverPort);
+
+						int i = 0;
+						for (Player p : players) {
+							sb.append(ClientCommands.SPLITTER);
+							sb.append(p.getName());
+							i++;
+						}
+
+						while (i < 4) {
+							sb.append(ClientCommands.SPLITTER);
+							sb.append("Bot " + i);
+						}
+						sb.append("\n");
+						game.send(sb.toString());
+						
+
+					} else if (commandSequence[0].equals(ServerCommands.SENDGAMEHOST)) {
+						System.out.println("Sending client info to UDP server...");
+						Game game = lobby.findGameFromPlayer(player);
+						game.sendHost(ClientCommands.GAME
+								+ ClientCommands.SPLITTER
+								+ ClientCommands.PLAYERINFO
+								+ ClientCommands.SPLITTER
+								+ player.getName()
+								+ ClientCommands.SPLITTER
+								+ player.getConnection().getInetAddress()
+										.getHostAddress()
+								+ ClientCommands.SPLITTER + commandExtra + "\n");
 						
 						
 						
