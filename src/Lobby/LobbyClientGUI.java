@@ -10,6 +10,8 @@ import java.awt.FlowLayout;
 import javax.swing.BoxLayout;
 import java.awt.GridLayout;
 import javax.swing.JButton;
+
+import java.awt.Container;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.Component;
@@ -56,6 +58,7 @@ import java.net.Socket;
 import javax.swing.DropMode;
 import javax.swing.AbstractListModel;
 import javax.swing.UIManager;
+import java.awt.Font;
 
 public class LobbyClientGUI {
 
@@ -67,7 +70,6 @@ public class LobbyClientGUI {
 	private JMenuItem menuCreateGame;
 	private JMenuItem menuLeaveGame;
 	private JMenuItem menuExit;
-	private JButton updateButton;
 	private JList gameList;
 	private JTextArea chatTextArea;
 	private JTextArea gameInfoTextArea;
@@ -80,11 +82,13 @@ public class LobbyClientGUI {
 	
 	private Socket connection;
 	private OutputStream output;
+	
+	
 
 	/**
 	 * Create the application.
 	 */
-	public LobbyClientGUI(String baseState, Socket connection) {
+	public LobbyClientGUI(Socket connection) {
 		this.connection = connection;		
 		try {
 			output = connection.getOutputStream();
@@ -95,7 +99,6 @@ public class LobbyClientGUI {
 		
 		initialize();
 		setGUIActions();
-		setPlayerName();
 		frame.setVisible(true);
 	}
 
@@ -104,7 +107,14 @@ public class LobbyClientGUI {
 	 */
 	private void initialize() {
 		System.out.println("Initialize");
+		inGame = false;
+		isHost = false;
+		playersInHostedGame = 0;
+		gameUserIsIn = "";
+		
 		frame = new JFrame();
+		frame.setBounds(100, 100, 500, 450);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setBackground(UIManager.getColor("Button.background"));
 		frame.getContentPane().setLayout(null);
 		
@@ -114,18 +124,18 @@ public class LobbyClientGUI {
 		lobbyPanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), "Lobby", TitledBorder.CENTER, TitledBorder.TOP, null, new Color(0, 0, 0)));
 		frame.getContentPane().add(lobbyPanel);
 		lobbyPanel.setLayout(null);
-		lobbyPanel.setVisible(true);
 		
 		JLabel lblChat = new JLabel("Game List");
 		lblChat.setBounds(20, 28, 70, 16);
 		lobbyPanel.add(lblChat);
 		
 		JScrollPane gameListScrollPane = new JScrollPane();
-		gameListScrollPane.setBounds(9, 46, 229, 154);
+		gameListScrollPane.setBounds(9, 46, 229, 174);
 		lobbyPanel.add(gameListScrollPane);
 		
 		listModel = new DefaultListModel();
 		gameList = new JList(listModel);
+		gameList.setFont(new Font("Helvetica", Font.PLAIN, 11));
 		gameListScrollPane.setViewportView(gameList);
 		gameList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		
@@ -143,17 +153,22 @@ public class LobbyClientGUI {
 		chatPanel.add(chatScrollPane);
 		
 		chatTextArea = new JTextArea();
+		chatTextArea.setFont(new Font("Helvetica", Font.PLAIN, 11));
 		chatScrollPane.setViewportView(chatTextArea);
+		chatTextArea.setLineWrap(true);
+		chatTextArea.setEditable(false);
 		
 		joinButton = new JButton("Join Game");
 		joinButton.setBackground(SystemColor.textHighlight);
 		joinButton.setBounds(338, 274, 145, 36);
 		frame.getContentPane().add(joinButton);
+		joinButton.setEnabled(false);
 		
 		startButton = new JButton("Start Game");
 		startButton.setBackground(SystemColor.textHighlight);
 		startButton.setBounds(338, 314, 145, 36);
 		frame.getContentPane().add(startButton);
+		startButton.setEnabled(false);
 		
 		typedTextField = new JFormattedTextField();
 		typedTextField.setBounds(6, 377, 235, 23);
@@ -193,15 +208,14 @@ public class LobbyClientGUI {
 		lobbyPanel.add(scrollPane);
 		
 		gameInfoTextArea = new JTextArea();
+		gameInfoTextArea.setFont(new Font("Helvetica", Font.PLAIN, 11));
 		scrollPane.setViewportView(gameInfoTextArea);
+		gameInfoTextArea.setLineWrap(true);
+		gameInfoTextArea.setEditable(false);
 		
 		JLabel lblGameInfo = new JLabel("Game Info");
 		lblGameInfo.setBounds(259, 28, 70, 16);
 		lobbyPanel.add(lblGameInfo);
-		
-		updateButton = new JButton("Update");
-		updateButton.setBounds(139, 201, 88, 19);
-		lobbyPanel.add(updateButton);
 	}
 	
 	private void setGUIActions(){
@@ -211,10 +225,14 @@ public class LobbyClientGUI {
 				if (e.getValueIsAdjusting() == false) {
 
 			        if (gameList.getSelectedIndex() == -1) {
-			        	joinButton.setEnabled(true);
+			        	joinButton.setEnabled(false);
 
 			        } else {
-			        	joinButton.setEnabled(false);
+			        	if(!inGame){
+			        		joinButton.setEnabled(true);
+			        	}
+			        	getGameInfo((String) listModel.elementAt(gameList.getSelectedIndex()));	
+			        	
 			        }
 			    }
 			}
@@ -224,6 +242,7 @@ public class LobbyClientGUI {
 		joinButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
+				System.out.println("join game clicked");
 				String game = (String) gameList.getSelectedValue();
 				if(game != null){
 					String action = ServerCommands.JOIN + ServerCommands.SPLITTER + game + "\n";
@@ -252,30 +271,34 @@ public class LobbyClientGUI {
 			}
 		});
 
-		menuCreateGame.addMouseListener(new MouseAdapter() {
+		menuCreateGame.addActionListener(new ActionListener(){
+
 			@Override
-			public void mouseClicked(MouseEvent arg0) {
+			public void actionPerformed(ActionEvent arg0) {
 				String gameName = JOptionPane.showInputDialog("Enter game name");
 				String action = ServerCommands.CREATE + ServerCommands.SPLITTER + gameName + "\n";
-				invokeAction(action);
+				invokeAction(action);				
 			}
+			
 		});
-
-		menuLeaveGame.addMouseListener(new MouseAdapter() {
+		
+		menuLeaveGame.addActionListener(new ActionListener(){
 			@Override
-			public void mouseClicked(MouseEvent arg0) {
+			public void actionPerformed(ActionEvent arg0) {
 				if(inGame){
 					String action = ServerCommands.LEAVE + ServerCommands.SPLITTER + gameUserIsIn + "\n";
 					invokeAction(action);
-				}
-			}
+				}				
+			}			
 		});
-		menuExit.addMouseListener(new MouseAdapter() {
+		
+		menuExit.addActionListener(new ActionListener(){
 			@Override
-			public void mouseClicked(MouseEvent arg0) {
+			public void actionPerformed(ActionEvent arg0) {
 				String action = ServerCommands.QUIT + "\n";
 				invokeAction(action);
-			}
+				System.exit(1);			
+			}			
 		});
 	}
 	
@@ -284,22 +307,27 @@ public class LobbyClientGUI {
 		invokeAction(action);
 	}
 	
-	public void invokeAction(String action){
-		if(action != null && action.length() > 0){
-			if(connection.isConnected()){
-				try {
-					output.write(action.getBytes());
-					output.flush();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}else{
-				chatTextArea.append("Connection broken");
-			}
+	public void invokeAction(final String action){
+		
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				if(action != null && action.length() > 0){
+					if(connection.isConnected()){
+						try {
+							output.write(action.getBytes());
+							output.flush();
+						} catch (IOException e) {
+							// 	TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}else{
+						chatTextArea.append("Connection broken");
+					}
 
 			
-		}
+				}
+			}
+		});
 	}
 	
 
@@ -316,12 +344,13 @@ public class LobbyClientGUI {
 			}
 			
 			action = action + typedTextField.getText() + "\n";
+			typedTextField.setText("");
 			invokeAction(action);
 			
 		}
 	}
 	
-	public synchronized String updateGUI(String action){
+	public String updateGUI(String action){
 		String[] actionSequence = action.split(ClientCommands.SPLITTER);
 		if(actionSequence[0].equals(ClientCommands.CHAT)){
 			updateChatArea(actionSequence);
@@ -330,7 +359,6 @@ public class LobbyClientGUI {
 		}else if(actionSequence[0].equals(ClientCommands.INITIALIZE)){
 			updateInitializeData(actionSequence);
 		}
-		notifyAll();
 		return action;
 	}
 
@@ -339,6 +367,9 @@ public class LobbyClientGUI {
 			listModel.addElement(actionSequence[2]);
 		}else if(actionSequence[1].equals(ClientCommands.REMOVAL)){
 			if(listModel.contains(actionSequence[2])){
+				if(gameList.getSelectedIndex() != -1 && gameList.getSelectedIndex() == listModel.indexOf(actionSequence[2])){
+					gameInfoTextArea.setText("");
+				}
 				listModel.removeElement(actionSequence[2]);
 			}
 		}else if(actionSequence[1].equals(ClientCommands.JOIN)){
@@ -354,23 +385,29 @@ public class LobbyClientGUI {
 		}else if(actionSequence[1].equals(ClientCommands.OTHERJOIN)){
 			getGameInfo(actionSequence[2]);
 			if(isHost){
-				int playersInGame = addPlayerToGame();
-				if(playersInGame == 4){
+				playersInHostedGame++;
+				System.out.println("Spelare i spelet: " + Integer.toString(playersInHostedGame));
+				if(playersInHostedGame == 4){
 					startButton.setEnabled(true);
 				}
+			}else{
+				System.out.println("Inte host");
 			}
-			chatTextArea.append(actionSequence[2] + ": " + actionSequence[3]);
+			chatTextArea.append("\n(" + gameUserIsIn + ")" + actionSequence[3]);
+			chatTextArea.setCaretPosition(chatTextArea.getDocument().getLength());
 			
 		}else if(actionSequence[1].equals(ClientCommands.OTHERLEAVE)){
 			getGameInfo(actionSequence[2]);
 			if(isHost){
+				playersInHostedGame--;
 				startButton.setEnabled(false);
 			}
 			chatTextArea.append(actionSequence[2] + ": " + actionSequence[3]);
 		}else if(actionSequence[1].equals(ClientCommands.START)){
 			if(isHost && playersInHostedGame == 4){
-				String action = "message-game: Game starting in 10 Seconds";
-				invokeAction(action);
+				System.out.println("Startbutton clicked");
+				//Add Command Chain for starting a game
+				//invokeAction(action);
 			}
 			
 		}		
@@ -386,19 +423,31 @@ public class LobbyClientGUI {
 			message = "(" + gameUserIsIn + ")";
 		}
 		message = message + actionSequence[2];
+		if(chatTextArea.getText().length() != 0){
+			message = "\n" + message;
+		}	
 		chatTextArea.append(message);
+		chatTextArea.setCaretPosition(chatTextArea.getDocument().getLength());
 	}
 	
 	private void updateInitializeData(String[] actionSequence) {
 		if(actionSequence[1].equals(ClientCommands.NAMETAKEN)){
-			chatTextArea.append("Name already taken, choose another one");
+			String line = "Name already taken, choose another one";
+			if(chatTextArea.getText().length() != 0){
+				line = "\n" + line;
+			}
+			chatTextArea.append(line);
 			setPlayerName();
 		}else if(actionSequence[1].equals(ClientCommands.LIST)){
-			String[] games = actionSequence[2].split("\n");
-			listModel.removeAllElements();
-			for(int i = 0; i < games.length; i++){
-				listModel.addElement(games[i]);
+			if(actionSequence.length > 2){
+				String[] games = actionSequence[2].split(ClientCommands.STRINGSPLITTER);
+				
+				listModel.removeAllElements();
+				for(int i = 0; i < games.length; i++){
+					listModel.addElement(games[i]);
+				}
 			}
+			
 		}
 	}
 	
@@ -412,7 +461,11 @@ public class LobbyClientGUI {
 	
 	private void leaveGame(String gameName){
 		joinButton.setEnabled(true);
-		getGameInfo(gameName);
+		if(gameList.getSelectedIndex() != -1 && gameList.getSelectedIndex() == listModel.indexOf(gameName)){
+			gameInfoTextArea.setText("");
+		}
+		gameInfoTextArea.setText("");
+		
 		gameUserIsIn = "";
 		inGame = false;
 		isHost = false;
@@ -422,6 +475,7 @@ public class LobbyClientGUI {
 		joinButton.setEnabled(false);
 		getGameInfo(gameName);
 		gameUserIsIn = gameName;
+		playersInHostedGame = 1;
 		inGame = true;
 		isHost = true;
 	}
@@ -434,27 +488,29 @@ public class LobbyClientGUI {
 		isHost = false;
 	}
 	
-	private int addPlayerToGame(){
-		return playersInHostedGame++;
-	}
-	
-	private int removePlayerFromGame(){
-		return playersInHostedGame--;
-	}
-	
 	private void setGameInfo(String info){
-		gameInfoTextArea.setText(info);
+		String[] gameInfo = info.split(ClientCommands.STRINGSPLITTER);
+		System.out.println(ClientCommands.STRINGSPLITTER);
+		gameInfoTextArea.setText("");
+		for(int i = 0; i < gameInfo.length; i++){
+			if(i == 0){
+				gameInfoTextArea.append(gameInfo[i]);
+			}else{
+				gameInfoTextArea.append("\n" + gameInfo[i]);
+			}
+		}
+		
 	}
 	
-	private void setPlayerName(){
-		String name = "bagge";
-//		while (name == null || name.length() == 0 || name.charAt(0) == ' '){
-//			name = JOptionPane.showInputDialog("Enter player name");
-//		}
+	public void setPlayerName(){
+		String name = null;
+		while (name == null || name.length() == 0 || name.charAt(0) == ' '){
+			name = JOptionPane.showInputDialog("Enter player name");
+		}
 		
 		if(connection.isConnected()){
 			try {
-				output.write(name.getBytes());
+				output.write((name  + "\n").getBytes());
 				output.flush();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -466,6 +522,4 @@ public class LobbyClientGUI {
 
 		
 	}
-
-
 }

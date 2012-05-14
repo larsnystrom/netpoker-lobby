@@ -85,11 +85,12 @@ public class Game {
 	
 	public String listFullGame(){
 		StringBuilder sb = new StringBuilder();
-		sb.append("Game name: "  + listGame() + "\n");
-		sb.append("Host: " + host.getName() + "\n");
+		sb.append("Game name: "  + listGame() + ClientCommands.STRINGSPLITTER);
+		sb.append("Host: " + host.getName() + ClientCommands.STRINGSPLITTER);
 		for(int i = 0; i < players.size(); i++){
-			sb.append("Player " + i + ": ");
-			sb.append(players.get(i).getName() + "\n");
+			int write = i + 1;
+			sb.append("Player " + write + ": ");
+			sb.append(players.get(i).getName() + ClientCommands.STRINGSPLITTER);
 		}
 		return sb.toString();
 	}

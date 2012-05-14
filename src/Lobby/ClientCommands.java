@@ -3,6 +3,8 @@ package Lobby;
 public class ClientCommands {
 	//Splitter
 	public static final String SPLITTER = "_%%_";
+	public static final String STRINGSPLITTER = "_%%%_";
+	
 	
 	//Chat commands
 	public static final String CHAT = "CHAT";

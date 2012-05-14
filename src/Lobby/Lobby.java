@@ -34,7 +34,7 @@ public class Lobby {
 	public String listGames(){
 		StringBuilder sb = new StringBuilder();
 		for(Game game: games){
-			sb.append(game.getGamename() + "\n");
+			sb.append(game.getGamename() + ClientCommands.STRINGSPLITTER);
 		}
 		return sb.toString();
 	}
@@ -64,11 +64,24 @@ public class Lobby {
 	}
 	
 	public boolean removePlayerFromGame(String gameName, Player player){
-		if(removePlayer(findGame(gameName), player)){
-			idlePlayers.add(player);
-			return true;
+		Game game = findGame(gameName);
+		boolean state = false;
+		if(game != null){
+			if(game.getHost().equals(player)){
+				System.out.println("Stänger ner spel");
+				closeGame(game, player);
+				state = true;
+			}else{
+				System.out.println("Tar bort spelare från spel");
+				
+				state = removePlayer(game, player);
+				if(state){
+					idlePlayers.add(player);
+				}
+			}
+			
 		}
-		return false;
+		return state;
 	}
 	
 	public boolean removeLostPlayer(Player player){
@@ -77,7 +90,7 @@ public class Lobby {
 			if(game.playerInGame(player)){
 				System.out.println("Removing idle player: " + player.getName());
 				if(game.host.equals(player)){
-					return closeGame(game, player);
+					return closeGameBroken(game, player);
 				}
 				return removePlayer(game, player);
 			}
@@ -88,11 +101,32 @@ public class Lobby {
 		
 	}
 	
-	private boolean closeGame(Game game, Player player){
+	/*
+	 * Is called if the connectionen to a game host is broken.
+	 */
+	private boolean closeGameBroken(Game game, Player player){
 		removePlayer(game, player);
 		game.send(ClientCommands.CHAT + ClientCommands.SPLITTER + ClientCommands.GAMECHAT + ClientCommands.SPLITTER +  "Host gone, closing game \n");
 		for(int i = 0; i < game.players.size(); i++){
 			Player p = game.players.remove(i);
+			System.out.println("Loopar: " + p.getName());
+			p.setInGame(false);
+			idlePlayers.add(p);
+		}
+		games.remove(game);
+		send(ClientCommands.GAME + ClientCommands.SPLITTER + ClientCommands.REMOVAL + ClientCommands.SPLITTER + game.getGamename() + "\n");
+		return true;
+		
+	}
+	
+	private boolean closeGame(Game game, Player player){
+		game.send(ClientCommands.CHAT + ClientCommands.SPLITTER + ClientCommands.GAMECHAT + ClientCommands.SPLITTER +  "The host has closed the game \n");
+		game.send(ClientCommands.GAME
+				+ ClientCommands.SPLITTER
+				+ ClientCommands.LEAVE
+				+ ClientCommands.SPLITTER
+				+ game.getGamename() + "\n");
+		for(Player p: game.players){
 			p.setInGame(false);
 			idlePlayers.add(p);
 		}
