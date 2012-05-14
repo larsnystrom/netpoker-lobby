@@ -25,18 +25,17 @@ public class LobbyClient {
 					public void run() {
 						
 							LobbyClientGUI window = new LobbyClientGUI("baseState", connection);
-							window.frame.setVisible(true);
 							InputStream input;
 							
 							try {
 								input = connection.getInputStream();
 								BufferedReader reader = new BufferedReader(new InputStreamReader(
 										input));
-								System.out.println("Write your player name:");
 								String line = reader.readLine();
 
 								while (line != null) {
 									System.out.println(line);
+									window.updateGUI(line);
 									line = reader.readLine();
 								}
 								System.exit(1);

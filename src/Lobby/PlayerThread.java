@@ -43,10 +43,12 @@ public class PlayerThread extends Thread {
 				}
 				
 			}
-			
+					
 			
 			output.write((ClientCommands.CHAT + ClientCommands.SPLITTER + ClientCommands.SYSTEM + ClientCommands.SPLITTER + "You joined the server\n").getBytes());
 			System.out.println("Initiated player");
+			output.flush();
+			output.write((ClientCommands.INITIALIZE + ClientCommands.SPLITTER + ClientCommands.LIST + ClientCommands.SPLITTER + lobby.listGames()).getBytes());
 			output.flush();
 			String[] commandSequence = new String[1];
 			do{

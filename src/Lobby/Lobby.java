@@ -33,7 +33,6 @@ public class Lobby {
 	
 	public String listGames(){
 		StringBuilder sb = new StringBuilder();
-		sb.append("Games: \n");
 		for(Game game: games){
 			sb.append(game.getGamename() + "\n");
 		}
