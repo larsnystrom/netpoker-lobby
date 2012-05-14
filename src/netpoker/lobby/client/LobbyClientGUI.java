@@ -106,44 +106,37 @@ public class LobbyClientGUI {
 		playerName = "";
 
 		frame = new JFrame();
-		frame.setBounds(100, 100, 500, 450);
+		frame.setBounds(100, 100, 570, 450);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.getContentPane().setBackground(
-				UIManager.getColor("Button.background"));
 		frame.getContentPane().setLayout(null);
 
 		JPanel lobbyPanel = new JPanel();
-		lobbyPanel.setBounds(6, 6, 488, 226);
-		lobbyPanel.setBackground(UIManager.getColor("Button.background"));
+		lobbyPanel.setBounds(6, 6, 488, 197);
 		lobbyPanel
-				.setBorder(new TitledBorder(new EtchedBorder(
-						EtchedBorder.LOWERED, null, null), "Lobby",
-						TitledBorder.CENTER, TitledBorder.TOP, null, new Color(
-								0, 0, 0)));
+				.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), "Lobby", TitledBorder.CENTER, TitledBorder.TOP, null, new Color(0, 102, 51)));
 		frame.getContentPane().add(lobbyPanel);
 		lobbyPanel.setLayout(null);
 
 		JLabel lblChat = new JLabel("Game List");
+		lblChat.setForeground(new Color(0, 102, 51));
 		lblChat.setBounds(20, 28, 70, 16);
 		lobbyPanel.add(lblChat);
 
 		JScrollPane gameListScrollPane = new JScrollPane();
-		gameListScrollPane.setBounds(9, 46, 229, 174);
+		gameListScrollPane.setBounds(9, 46, 229, 143);
 		lobbyPanel.add(gameListScrollPane);
 
 		listModel = new DefaultListModel();
 		gameList = new JList(listModel);
-		gameList.setFont(new Font("Helvetica", Font.PLAIN, 11));
+		gameList.setFont(new Font("Helvetica", Font.PLAIN, 13));
 		gameListScrollPane.setViewportView(gameList);
 		gameList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
 		JPanel chatPanel = new JPanel();
-		chatPanel.setBorder(new TitledBorder(new EtchedBorder(
-				EtchedBorder.LOWERED, null, null), "Chat",
-				TitledBorder.LEADING, TitledBorder.TOP, null,
-				new Color(0, 0, 0)));
-		chatPanel.setBackground(UIManager.getColor("Button.background"));
-		chatPanel.setBounds(6, 244, 320, 128);
+		chatPanel.setForeground(new Color(0, 0, 0));
+		chatPanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), "Chat", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 102, 51)));
+		chatPanel.setBackground(UIManager.getColor(new Color(0, 128, 0)));
+		chatPanel.setBounds(6, 215, 340, 157);
 		frame.getContentPane().add(chatPanel);
 		chatPanel.setLayout(null);
 
@@ -151,33 +144,35 @@ public class LobbyClientGUI {
 		chatScrollPane
 				.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		chatScrollPane.setViewportBorder(null);
-		chatScrollPane.setBounds(6, 18, 308, 104);
+		chatScrollPane.setBounds(6, 18, 328, 133);
 		chatPanel.add(chatScrollPane);
 
 		chatTextArea = new JTextArea();
-		chatTextArea.setFont(new Font("Helvetica", Font.PLAIN, 11));
+		chatTextArea.setFont(new Font("Helvetica", Font.PLAIN, 12));
 		chatScrollPane.setViewportView(chatTextArea);
 		chatTextArea.setLineWrap(true);
 		chatTextArea.setEditable(false);
 
 		joinButton = new JButton("Join Game");
-		joinButton.setBackground(SystemColor.textHighlight);
-		joinButton.setBounds(338, 274, 145, 36);
-		frame.getContentPane().add(joinButton);
 		joinButton.setEnabled(false);
+		joinButton.setForeground(new Color(0, 102, 51));
+		joinButton.setBounds(358, 258, 125, 36);
+		frame.getContentPane().add(joinButton);
 
 		startButton = new JButton("Start Game");
-		startButton.setBackground(SystemColor.textHighlight);
-		startButton.setBounds(338, 314, 145, 36);
-		frame.getContentPane().add(startButton);
 		startButton.setEnabled(false);
+		startButton.setForeground(new Color(0, 102, 51));
+		startButton.setBackground(SystemColor.textHighlight);
+		startButton.setBounds(358, 301, 125, 36);
+		frame.getContentPane().add(startButton);
 
 		typedTextField = new JFormattedTextField();
-		typedTextField.setBounds(6, 377, 235, 23);
+		typedTextField.setBounds(6, 377, 250, 23);
 		frame.getContentPane().add(typedTextField);
 
 		sendButton = new JButton("Send");
-		sendButton.setBounds(253, 377, 68, 20);
+		sendButton.setForeground(new Color(0, 102, 51));
+		sendButton.setBounds(261, 377, 84, 23);
 		frame.getContentPane().add(sendButton);
 		frame.setBounds(100, 100, 500, 450);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -186,36 +181,37 @@ public class LobbyClientGUI {
 		menuBar.setBackground(UIManager.getColor("Button.background"));
 		frame.setJMenuBar(menuBar);
 
-		JMenu menu = new JMenu("File");
-		menu.setBackground(UIManager.getColor("Button.background"));
-		menuBar.add(menu);
+		JMenu mnMenu = new JMenu("Menu");
+		mnMenu.setForeground(new Color(0, 0, 0));
+		mnMenu.setBackground(UIManager.getColor("Button.background"));
+		menuBar.add(mnMenu);
 
 		menuCreateGame = new JMenuItem("Create Game");
-		menuCreateGame.setOpaque(false);
-		menu.add(menuCreateGame);
+		mnMenu.add(menuCreateGame);
 
 		menuLeaveGame = new JMenuItem("Leave Game");
 		menuLeaveGame.setOpaque(false);
-		menu.add(menuLeaveGame);
+		mnMenu.add(menuLeaveGame);
 
 		JSeparator separator = new JSeparator();
-		menu.add(separator);
+		mnMenu.add(separator);
 
 		menuExit = new JMenuItem("Exit");
 		menuExit.setOpaque(false);
-		menu.add(menuExit);
+		mnMenu.add(menuExit);
 
 		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(250, 46, 228, 174);
+		scrollPane.setBounds(250, 46, 228, 143);
 		lobbyPanel.add(scrollPane);
 
 		gameInfoTextArea = new JTextArea();
-		gameInfoTextArea.setFont(new Font("Helvetica", Font.PLAIN, 11));
+		gameInfoTextArea.setFont(new Font("Helvetica", Font.PLAIN, 12));
 		scrollPane.setViewportView(gameInfoTextArea);
 		gameInfoTextArea.setLineWrap(true);
 		gameInfoTextArea.setEditable(false);
 
 		JLabel lblGameInfo = new JLabel("Game Info");
+		lblGameInfo.setForeground(new Color(0, 102, 51));
 		lblGameInfo.setBounds(259, 28, 70, 16);
 		lobbyPanel.add(lblGameInfo);
 	}
